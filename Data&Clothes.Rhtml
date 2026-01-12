@@ -1,0 +1,216 @@
+---
+title: "Data&Clothes"
+author: "Gyna & Yona"
+date: "2026-01-12"
+output: html_document
+---
+# ==========================
+# MODÈLE DE DONNÉES
+# ==========================
+
+## OBJET 1 — SAISONS & TEMPÉRATURES
+# Ce data frame définit les saisons et leurs températures min/max associées.
+# Il permettra de déterminer quelles saisons sont compatibles avec une température donnée.
+saisons <- data.frame(
+  saison = c("printemps", "été", "automne", "hiver"),
+  temp_min = c(10, 20, 10, -5),
+  temp_max = c(20, 35, 18, 10),
+  stringsAsFactors = FALSE
+)
+
+### OBJET 2 — TENUES (CŒUR DU SYSTÈME)
+# Ce data frame contient toutes les tenues disponibles.
+# Chaque ligne correspond à une tenue unique avec :
+# - sa saison
+# - son humeur (professionnel, chill, stylé)
+# - le haut, le bas et les chaussures
+# - un indicateur si la tenue est propre
+# - un compteur du nombre d'utilisations
+tenues <- data.frame(
+  saison = c( # PRINTEMPS
+    "printemps","printemps","printemps",
+    # ÉTÉ
+    "été","été","été",
+    # AUTOMNE
+    "automne","automne","automne",
+    # HIVER
+    "hiver","hiver","hiver"
+  ),
+  humeur = c(
+    "professionnel","chill","stylé",
+    "professionnel","chill","stylé",
+    "professionnel","chill","stylé",
+    "professionnel","chill","stylé"
+  ),
+  haut = c(
+    # printemps
+    "Blouse légère","Cardigan léger","Trench",
+    # été
+    "Robe chemise","Débardeur","Crop top chic",
+    # automne
+    "Chemisier soie","Pull cachemire","Col roulé",
+    # hiver
+    "Pull col montant","Pull oversize","Pull graphique"
+  ),
+  bas = c(
+    # printemps
+    "Pantalon clair","Robe fluide","Jean boyfriend",
+    # été
+    "Pantalon fluide","Short jean","Pantalon palazzo",
+    # automne
+    "Pantalon costume","Jean slim","Jupe cuir",
+    # hiver
+    "Pantalon laine","Jogging chaud","Jean foncé"
+  ),
+  chaussures = c(
+    # printemps
+    "Mocassins","Baskets","Bottines",
+    # été
+    "Sandales talons","Espadrilles","Sandales plateformes",
+    # automne
+    "Bottines","Sneakers","Bottes motardes",
+    # hiver
+    "Bottes","Boots","Bottes fantaisie"
+  ),
+  propre = TRUE,         # Indique si la tenue est disponible
+  nb_utilisations = 0,   # Compteur du nombre de fois où la tenue a été portée
+  stringsAsFactors = FALSE
+)
+
+#### VÉRIFICATION
+# Permet de vérifier que chaque saison a bien une tenue pour chaque humeur
+table(tenues$saison, tenues$humeur)
+
+#### Température → saisons compatibles
+# Fonction qui retourne les saisons compatibles avec une température donnée
+saisons_compatibles <- function(temp) {
+  saisons$saison[temp >= saisons$temp_min & temp <= saisons$temp_max]
+}
+
+#### Sélection automatique d’une tenue
+# Fonction qui choisit une tenue selon la température, l'humeur et la disponibilité
+selection_tenue <- function(temp, humeur, tenues) {
+
+  # Identifier les saisons compatibles avec la température
+  saisons_ok <- saisons_compatibles(temp)
+
+  # Filtrer les tenues correspondant à la saison, à l'humeur et qui sont propres
+  eligibles <- tenues[
+    tenues$saison %in% saisons_ok &
+    tenues$humeur == humeur &
+    tenues$propre,
+  ]
+# Si aucune tenue n'est disponible, renvoyer NULL
+  if (nrow(eligibles) == 0) { return(NULL) }
+
+  
+# Sinon, choisir aléatoirement une tenue parmi les éligibles
+  eligibles[sample(nrow(eligibles), 1), ]
+}
+
+#### Automatisation “porter → sale”
+# Met à jour l'état d'une tenue portée : sale + compteur d'utilisation
+porter_tenue <- function(tenue, tenues) {
+  # Identifier l'index exact de la tenue
+  idx <- with(tenues,
+    saison == tenue$saison &
+    humeur == tenue$humeur &
+    haut == tenue$haut &
+    bas == tenue$bas &
+    chaussures == tenue$chaussures
+  )
+
+  # La tenue devient sale
+  tenues$propre[idx] <- FALSE
+  # Incrémenter le nombre d'utilisations
+  tenues$nb_utilisations[idx] <- tenues$nb_utilisations[idx] + 1
+
+  tenues
+}
+
+#### Fonction de lavage (simple)
+# Remet toutes les tenues à propre
+laver_tout <- function(tenues) {
+  tenues$propre <- TRUE
+  tenues
+}
+
+#### Test complet (preuve que tout marche)
+# Exemple : choisir une tenue pour 18°C et humeur "stylé"
+temp <- 18
+humeur <- "stylé"
+
+tenue <- selection_tenue(temp, humeur, tenues)
+
+# Affichage et mise à jour des tenues si une tenue est sélectionnée
+if (!is.null(tenue)) {
+  print(tenue)
+  tenues <- porter_tenue(tenue, tenues)
+}
+
+#### Interface Shiny
+library(shiny)
+
+# UI
+ui <- fluidPage(
+  titlePanel("Sélecteur de tenue"),
+  sidebarLayout(
+    sidebarPanel(
+      numericInput("temp", "Température (°C)", value = 20, min = -10, max = 40),
+      selectInput("humeur", "Humeur", choices = c("professionnel", "chill", "stylé")),
+      actionButton("valider", "Obtenir tenue"),
+      actionButton("laver", "Laver toutes les tenues")
+    ),
+    mainPanel(
+      h3("Tenue sélectionnée"),
+      verbatimTextOutput("tenue_affiche"),
+      h3("État des tenues"),
+      tableOutput("etat_tenues")
+    )
+  )
+)
+
+# Serveur
+server <- function(input, output, session) {
+
+  # Stockage réactif des tenues
+  tenues_react <- reactiveVal(tenues)
+
+  # Affichage tenue et mise à jour de l'état
+  observeEvent(input$valider, {
+    # Sélectionner une tenue selon température et humeur
+    t <- selection_tenue(input$temp, input$humeur, tenues_react())
+
+    # Si aucune tenue n'est disponible
+    if (is.null(t)) {
+      output$tenue_affiche <- renderText("Aucune tenue disponible pour ces critères !")
+    } else {
+      # Affichage de la tenue sélectionnée
+      output$tenue_affiche <- renderText({
+        paste(
+          "Saison:", t$saison, "\n",
+          "Haut:", t$haut, "\n",
+          "Bas:", t$bas, "\n",
+          "Chaussures:", t$chaussures
+        )
+      })
+      # Mettre à jour l'état des tenues après usage
+      nouvelles_tenues <- porter_tenue(t, tenues_react())
+      tenues_react(nouvelles_tenues)
+    }
+  })
+
+  # Bouton laver tout
+  observeEvent(input$laver, {
+    nouvelles_tenues <- laver_tout(tenues_react())
+    tenues_react(nouvelles_tenues)
+    output$tenue_affiche <- renderText("Toutes les tenues sont lavées et propres !")
+  })
+
+  # Affichage de l'état interne des tenues (tableau)
+  output$etat_tenues <- renderTable({ tenues_react() })
+}
+
+# Lancer l'app
+shinyApp(ui, server)
+
