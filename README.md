@@ -1,4 +1,4 @@
-Data-Clothes,
+Data&Clothes,
 L'analyse des données comme outil pour nous aider à choisir quotidiennement notre look du jour.
 
 Le Sélecteur de Tenue "Data&Clothes" est une application interactive développée avec R et Shiny. Elle permet de choisir automatiquement une tenue vestimentaire adaptée en fonction de la température extérieure et de l’humeur de l’utilisateur. Le système prend en compte la disponibilité des vêtements, afin de ne proposer que ceux qui sont propres.
