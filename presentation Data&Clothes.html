@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data-Clothes: Système Intelligent de Sélection de Tenues</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffffff;
+            color: #1a1a1a;
+        }
+
+        .slide {
+            width: 960px;
+            height: 540px;
+            margin: 0 auto 20px;
+            display: flex;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .slide.title {
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            flex-direction: column;
+        }
+
+        .slide.content {
+            background-color: #ffffff;
+            border-left: 6px solid #2c5aa0;
+            padding: 3rem 4rem;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .slide.two-column {
+            padding: 3rem 2rem;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #2c5aa0;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #2c5aa0;
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid #2c5aa0;
+            padding-bottom: 0.8rem;
+        }
+
+        h3 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 0.8rem;
+        }
+
+        h4 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2c5aa0;
+            margin-top: 1rem;
+            margin-bottom: 0.6rem;
+        }
+
+        p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #333333;
+            margin-bottom: 0.8rem;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            color: #333333;
+            margin-bottom: 0.6rem;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: #666666;
+            margin-bottom: 2rem;
+        }
+
+        .authors {
+            font-size: 1.2rem;
+            color: #888888;
+            margin-top: 3rem;
+        }
+
+        .two-col-container {
+            display: flex;
+            gap: 2rem;
+            height: 100%;
+        }
+
+        .col {
+            flex: 1;
+            padding: 1.5rem;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .col h3 {
+            margin-top: 0;
+        }
+
+        .season-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .season-box {
+            background-color: #f0f0f0;
+            padding: 1rem;
+            border-left: 4px solid #2c5aa0;
+            border-radius: 2px;
+        }
+
+        .season-box strong {
+            color: #2c5aa0;
+            display: block;
+            margin-bottom: 0.4rem;
+        }
+
+        .season-box p {
+            font-size: 1rem;
+            margin: 0;
+            color: #555;
+        }
+
+        .highlight {
+            background-color: #f0f0f0;
+            padding: 1.5rem;
+            border-left: 4px solid #2c5aa0;
+            margin: 1rem 0;
+            border-radius: 2px;
+        }
+
+        .function-box {
+            background-color: #f9f9f9;
+            padding: 1.2rem;
+            margin: 0.8rem 0;
+            border-left: 4px solid #2c5aa0;
+            border-radius: 2px;
+        }
+
+        .function-box strong {
+            color: #2c5aa0;
+        }
+
+        .step {
+            margin-left: 1rem;
+            padding: 0.5rem 0;
+            font-size: 1.1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 1rem;
+        }
+
+        table th {
+            background-color: #2c5aa0;
+            color: #ffffff;
+            padding: 0.8rem;
+            text-align: left;
+        }
+
+        table td {
+            padding: 0.8rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .comparison-row {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .comparison-item {
+            flex: 1;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            border-left: 4px solid #2c5aa0;
+        }
+
+        .comparison-item strong {
+            color: #2c5aa0;
+            display: block;
+            margin-bottom: 0.4rem;
+        }
+
+        .code-block {
+            background-color: #f5f5f5;
+            padding: 1rem;
+            border-left: 4px solid #2c5aa0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            margin: 1rem 0;
+            border-radius: 2px;
+            overflow: auto;
+        }
+
+        .centered {
+            text-align: center;
+        }
+
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+
+    <!-- Slide 1: Titre -->
+    <section class="slide title">
+        <h1>Data-Clothes</h1>
+        <p class="subtitle">Système Intelligent de Sélection de Tenues</p>
+        <p class="subtitle">Application Shiny en R</p>
+        <p class="authors">Gyna & Yona</p>
+    </section>
+
+    <!-- Slide 2: Introduction -->
+    <section class="slide content">
+        <h2>Introduction</h2>
+        <p>Présentation d'une application interactive développée en R et Shiny qui résout un problème quotidien : comment choisir les bonnes tenues en fonction de la température et de nos envies.</p>
+        <h3 style="margin-top: 2rem;">Objectif Principal</h3>
+        <p>Automatiser et rationaliser nos choix vestimentaires en combinant la gestion de données avec une interface utilisateur intuitive.</p>
+        <div class="highlight">
+            <strong>C'est une application web simple mais intelligente qui vous recommande les vêtements appropriés en deux clics.</strong>
+        </div>
+    </section>
+
+    <!-- Slide 3: Le Problème -->
+    <section class="slide content">
+        <h2>Le Problème Que Nous Résolvons</h2>
+        <p>Chaque matin, nous nous posons la même question : "Que dois-je porter ?"</p>
+        <p>Cette décision dépend de plusieurs facteurs critiques :</p>
+        <ul>
+            <li><strong>Température extérieure</strong> : Adapter les vêtements au climat</li>
+            <li><strong>Humeur ou occasion</strong> : Être élégant, professionnel, ou confortable</li>
+            <li><strong>Disponibilité</strong> : Certaines tenues sont déjà portées et en attente de lavage</li>
+            <li><strong>Saisons</strong> : Les tenues appropriées varient considérablement selon les périodes</li>
+        </ul>
+        <p style="margin-top: 1.5rem;"><strong>Data-Clothes automatise cette logique en combinant intelligemment tous ces critères.</strong></p>
+    </section>
+
+    <!-- Slide 4: Architecture - Base de Données des Saisons -->
+    <section class="slide content">
+        <h2>Architecture Générale - Saisons</h2>
+        <p>Notre application définit quatre saisons avec leurs plages de température associées :</p>
+        <div class="season-grid">
+            <div class="season-box">
+                <strong>Printemps</strong>
+                <p>10°C à 20°C<br>Vêtements légers et mi-saison</p>
+            </div>
+            <div class="season-box">
+                <strong>Été</strong>
+                <p>20°C à 35°C<br>Tenues légères et découvertes</p>
+            </div>
+            <div class="season-box">
+                <strong>Automne</strong>
+                <p>10°C à 18°C<br>Vêtements plus épais et structurés</p>
+            </div>
+            <div class="season-box">
+                <strong>Hiver</strong>
+                <p>-5°C à 10°C<br>Tenues chaudes et protectrices</p>
+            </div>
+        </div>
+        <p style="margin-top: 1.5rem; font-size: 1.1rem;">Ces plages permettent au système de déterminer automatiquement la saison en fonction de la température.</p>
+    </section>
+
+    <!-- Slide 5: Architecture - Catalogue de Tenues -->
+    <section class="slide content">
+        <h2>Architecture - Catalogue de Tenues</h2>
+        <p>Le cœur du système : 12 tenues complètes (3 par saison, 4 humeurs).</p>
+        <p style="margin: 1rem 0;"><strong>Chaque tenue est définie par :</strong></p>
+        <ul>
+            <li>La saison (Printemps, été, automne, hiver)</li>
+            <li>L'humeur ou l'occasion (professionnel, chill, stylé)</li>
+            <li>Les composants vestimentaires (haut, bas, chaussures)</li>
+            <li>L'état de propreté (disponible ou sale)</li>
+            <li>Le compteur d'utilisation (nombre de fois portée)</li>
+        </ul>
+        <div class="highlight" style="margin-top: 1.5rem;">
+            <strong>Exemple printemps professionnel :</strong> Blouse légère + Pantalon clair + Mocassins
+        </div>
+    </section>
+
+    <!-- Slide 6: Fonction 1 - Saisons Compatibles -->
+    <section class="slide content">
+        <h2>Fonctions Métier - Saisons Compatibles</h2>
+        <div class="function-box">
+            <strong>Fonction 1 : saisons_compatibles(température)</strong>
+            <p>Prend une température en entrée et retourne toutes les saisons compatibles.</p>
+        </div>
+        <p><strong>Exemples d'utilisation :</strong></p>
+        <ul>
+            <li>saisons_compatibles(15) → Printemps ET Automne</li>
+            <li>saisons_compatibles(-2) → Hiver</li>
+            <li>saisons_compatibles(25) → Été</li>
+        </ul>
+        <p style="margin-top: 1.5rem;"><strong>Cette fonction est l'étape logique initiale de notre sélection.</strong></p>
+    </section>
+
+    <!-- Slide 7: Fonction 2 - Sélection de Tenue -->
+    <section class="slide content">
+        <h2>Fonctions Métier - Sélection de Tenue</h2>
+        <p><strong>Fonction 2 : selection_tenue(température, humeur, tenues)</strong></p>
+        <p style="margin-bottom: 1.5rem;">C'est la fonction centrale du système. Elle effectue ces étapes :</p>
+        <div style="margin-left: 1rem;">
+            <h4>Étape 1 : Vérifier les saisons compatibles</h4>
+            <h4>Étape 2 : Filtrer les tenues</h4>
+            <p style="margin-left: 1rem; font-size: 1.1rem;">Saison correcte ET Humeur correcte ET Propre</p>
+            <h4>Étape 3 : Vérifier la disponibilité</h4>
+            <h4>Étape 4 : Sélectionner aléatoirement</h4>
+        </div>
+        <p style="margin-top: 1.5rem;"><strong>Si aucune tenue ne correspond : message "Aucune tenue disponible"</strong></p>
+    </section>
+
+    <!-- Slide 8: Fonction 3 - Porter une Tenue -->
+    <section class="slide content">
+        <h2>Fonctions Métier - Porter et Laver</h2>
+        <div class="function-box">
+            <strong>Fonction 3 : porter_tenue(tenue)</strong>
+            <p>Quand vous portez une tenue, deux mise à jour se produisent :</p>
+        </div>
+        <ul>
+            <li>La tenue devient sale (non disponible jusqu'au lavage)</li>
+            <li>Le compteur d'utilisation s'incrémente de 1</li>
+        </ul>
+        <div class="function-box" style="margin-top: 1.5rem;">
+            <strong>Fonction 4 : laver_tout()</strong>
+            <p>Remet TOUTES les tenues à l'état propre en une seule action. Simple et utile après la lessive.</p>
+        </div>
+    </section>
+
+    <!-- Slide 9: Interface Shiny - Panneau Latéral -->
+    <section class="slide content">
+        <h2>L'Interface Shiny - Contrôles</h2>
+        <p>Panneau latéral avec contrôles utilisateur :</p>
+        <ul>
+            <li><strong>Champ de température</strong> : Saisie numérique entre -10°C et 40°C</li>
+            <li><strong>Menu déroulant d'humeur</strong> : Choix entre professionnel, chill, ou stylé</li>
+            <li><strong>Bouton "Obtenir tenue"</strong> : Déclenche la sélection automatique</li>
+            <li><strong>Bouton "Laver toutes les tenues"</strong> : Réinitialise l'état de propreté</li>
+        </ul>
+        <p style="margin-top: 1.5rem; background-color: #f0f0f0; padding: 1rem; border-radius: 4px;">L'interface est volontairement simple et épurée pour une utilisation rapide le matin.</p>
+    </section>
+
+    <!-- Slide 10: Interface Shiny - Résultats -->
+    <section class="slide content">
+        <h2>L'Interface Shiny - Résultats</h2>
+        <p>Panneau principal affichant :</p>
+        <h4>Tenue Sélectionnée</h4>
+        <p style="margin-left: 1rem;">Affiche clairement la saison, le haut, le bas, et les chaussures recommandés.</p>
+        <h4 style="margin-top: 1.5rem;">État des Tenues</h4>
+        <p style="margin-left: 1rem;">Tableau complet montrant toutes les tenues, leurs humeurs, leur état de propreté, et le nombre d'utilisations.</p>
+        <p style="margin-top: 1.5rem;"><strong>Cet affichage détaillé vous permet de voir exactement l'état de votre garde-robe.</strong></p>
+    </section>
+
+    <!-- Slide 11: Le Système Réactif -->
+    <section class="slide content">
+        <h2>Le Système Réactif</h2>
+        <p>Un des aspects les plus puissants : les variables réactives de Shiny.</p>
+        <ul>
+            <li>Chaque clic sur "Obtenir tenue" met à jour la tenue dans la base de données</li>
+            <li>Les tenues portées deviennent immédiatement indisponibles</li>
+            <li>Si toutes les tenues d'une catégorie sont sales, un message d'erreur apparaît</li>
+            <li>Seul le bouton "Laver" permet de réinitialiser</li>
+        </ul>
+        <p style="margin-top: 1.5rem; background-color: #f0f0f0; padding: 1rem; border-radius: 4px;"><strong>Ce comportement réactif crée une simulation réaliste de vos choix vestimentaires quotidiens.</strong></p>
+    </section>
+
+    <!-- Slide 12: Cas Pratique 1 -->
+    <section class="slide content">
+        <h2>Cas Pratiques - Journée d'Hiver</h2>
+        <h3>Scénario 1 : Froide journée d'hiver avec meeting</h3>
+        <p><strong>Paramètres :</strong> -2°C, Humeur = Professionnel</p>
+        <ul>
+            <li>Vous entrez -2°C dans le champ de température</li>
+            <li>Vous sélectionnez "professionnel"</li>
+            <li>Vous cliquez sur "Obtenir tenue"</li>
+        </ul>
+        <p style="margin-top: 1.5rem;"><strong>Résultat :</strong></p>
+        <p>L'application identifie que -2°C est compatible avec l'hiver, trouve la tenue professionnelle hivernale (Pull col montant + Pantalon laine + Bottes), et vous la propose. La tenue devient sale et le compteur s'incrémente.</p>
+    </section>
+
+    <!-- Slide 13: Cas Pratique 2 -->
+    <section class="slide content">
+        <h2>Cas Pratiques - Journée Détendue</h2>
+        <h3>Scénario 2 : Journée détendue au printemps</h3>
+        <p><strong>Paramètres :</strong> 15°C, Humeur = Chill</p>
+        <ul>
+            <li>Vous entrez 15°C</li>
+            <li>Vous sélectionnez "chill"</li>
+            <li>Vous cliquez sur "Obtenir tenue"</li>
+        </ul>
+        <p style="margin-top: 1.5rem;"><strong>Résultat :</strong></p>
+        <p>Le système sait que 15°C peut être printemps OU automne. Il cherche une tenue "chill" dans ces deux saisons, trouve les candidates (Cardigan léger au printemps ou Pull cachemire en automne), et en choisit une aléatoirement.</p>
+    </section>
+
+    <!-- Slide 14: Cas Pratique 3 -->
+    <section class="slide content">
+        <h2>Cas Pratiques - Garde-Robe Vide</h2>
+        <h3>Scénario 3 : Garde-robe complètement portée</h3>
+        <p>Si vous avez porté toutes les tenues d'une catégorie et qu'aucune n'est propre :</p>
+        <div class="highlight" style="margin-top: 1.5rem;">
+            <p>"Aucune tenue disponible pour ces critères !"</p>
+        </div>
+        <p style="margin-top: 1.5rem;"><strong>Solution :</strong> Vous devez cliquer sur "Laver toutes les tenues" pour continuer et réinitialiser votre garde-robe.</p>
+        <p style="margin-top: 1rem;">Ce mécanisme simule réalistement les conséquences réelles de vos choix vestimentaires quotidiens.</p>
+    </section>
+
+
+    <!-- Slide 16: Limitations et Améliorations -->
+    <section class="slide content">
+        <h2>Limitations et Améliorations Futures</h2>
+        <h3>Limitations actuelles :</h3>
+        <ul style="font-size: 1.1rem; margin-bottom: 1rem;">
+            <li>Catalogue limité (12 tenues)</li>
+            <li>Pas d'intégration météo réelle</li>
+            <li>Pas de préférences personnelles</li>
+            <li>Pas de contexte (jour de travail vs weekend)</li>
+        </ul>
+        <h3>Améliorations futures envisagées :</h3>
+        <ul style="font-size: 1.1rem;">
+            <li>API météo pour température automatique</li>
+            <li>Système de vote pour préférences</li>
+            <li>Algorithme d'apprentissage automatique</li>
+            <li>Galerie d'images des tenues</li>
+        </ul>
+    </section>
+
+    <!-- Slide 17: Conclusion -->
+    <section class="slide content">
+        <h2>Conclusion</h2>
+        <p>Data-Clothes démontre comment une combinaison de :</p>
+        <ul>
+            <li>Données bien structurées</li>
+            <li>Logique métier claire</li>
+            <li>Interface interactive intuitive</li>
+        </ul>
+        <p style="margin-top: 1.5rem;">...peut résoudre un problème quotidien concret.</p>
+        <div class="highlight" style="margin-top: 2rem;">
+            <p><strong>L'application est opérationnelle, extensible, et démontre le potentiel de la data science pour améliorer la vie quotidienne.</strong></p>
+        </div>
+    </section>
+
+    <!-- Slide 18: Merci -->
+    <section class="slide title">
+        <h1 style="font-size: 4rem; margin-bottom: 2rem;">Merci</h1>
+        <p style="font-size: 1.5rem; color: #666666;">Questions et démonstration</p>
+    </section>
+
+</body>
+</html>
